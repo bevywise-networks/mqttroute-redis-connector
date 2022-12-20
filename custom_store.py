@@ -18,26 +18,26 @@
 #
 #################################################################
 
-# Change the below values if you are running the Redis in a remote host.
-
-redishost='localhost'
-redisport=6379
-
-
 import redis
+import json
 
-import time
 
-global r
-r = redis.StrictRedis(host=redishost, port=redisport, db=0)
+# Change the below values if you are running the Redis in a remote host.
+redishost = 'localhost'
+redisport = 6379
+
+global redis_conn
+redis_conn = redis.StrictRedis(host=redishost, port=redisport, db=0)
 
 def handle_Received_Payload(data):
-
-        print data
-        client = data['sender']
-        unixtime=data['unixtime']
-        key = str(client)+'_'+str(unixtime)
-        print key
-
-        global r
-        r.set(key, data)
+	try:
+		global redis_conn
+		client = data['sender']
+		unixtime = data['unixtime']
+		key = str(client)+'_'+str(unixtime)
+		print('Key:', key, ' Data:', data)
+		if isinstance(data, dict):
+			data = json.dumps(data)
+		redis_conn.set(key, data)
+	except Exception as e:
+		print(e)
